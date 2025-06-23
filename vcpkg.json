@@ -1,0 +1,10 @@
+{
+    "version-string": "1.0.0",  
+    "dependencies": [
+        {
+            "name": "python3",
+            "version>=": "3.11.8"
+        }
+    ],
+    "builtin-baseline": "4bee3f5aae7aefbc129ca81c33d6a062b02fcf3b"
+}

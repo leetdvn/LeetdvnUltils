@@ -1,6 +1,39 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LeePyLibrary VERSION 0.1 LANGUAGES CXX)
+project(PythonLibrary VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
+
+message("leetdvn 1: ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonLibraryConfig.cmake")
+
+# Only include these if they are set
+if(LEETDVN_INCLUDE_DIR)
+    include_directories(${LEETDVN_INCLUDE_DIR})
+endif()
+
+if(LEETDVNPY_SOURCE_DIR)
+    include_directories(${LEETDVNPY_SOURCE_DIR})
+endif()
+
+set(PROJECT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/PythonUltils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PythonUltils.cpp
+)
+
+add_library(PythonLibrary SHARED
+    ${PROJECT_SOURCES}
+)
+
+target_link_libraries(PythonLibrary
+    PRIVATE
+        Python3::Python
+        Qt::Core
+)
+target_include_directories(PythonLibrary
+    PUBLIC
+    ../libs
+)

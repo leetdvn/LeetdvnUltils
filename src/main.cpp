@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <iostream>
-#include "include/common/Singleton.h"
 
 using namespace std;
 

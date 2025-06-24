@@ -5,23 +5,33 @@ project(LeetdvnUltils VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
+#load configurations file
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LeetdvnConfig.cmake)
-include_directories(${LEETDVN_INCLUDE_DIR})
 
+# add directories for the Python library
 add_subdirectory(PythonLibrary)
-set(PythonLibrary_LIBS ${PythonLibrary_BINARY_DIR}/)
 
-message("leetdvn X: ${PythonLibrary_LIBS}")
+# include directories for the project
+include_directories(${LEETDVN_INCLUDE_DIR})
+include_directories(${LEETDVN_INCLUDE_DIR}/common)
+include_directories(${PythonLibrary_SOURCE_DIR}/include)
 
-set(PROJECT_SOURCES
-    Definations.h,
-    Singleton.h,
-)
-
+# add the source files for the project
 add_executable(LeetdvnUltils
-    ${PROJECT_SOURCE}
+    #${PROJECT_SOURCE}
     src/main.cpp
 )
 
-target_link_libraries(LeetdvnUltils PRIVATE ${PythonLibrary_LIBS}/PythonLibrary.dll)
+
+### Link the Python library to the project
+target_link_libraries(LeetdvnUltils PRIVATE PythonLibrary)
+target_compile_definitions(PythonLibrary PUBLIC LEEVDVN_LIBRARY)
+target_include_directories(LeetdvnUltils PUBLIC ${PythonLibrary_BINARY_DIR}/deploy/include)
+
+# run Executable after build
+# This is useful for testing purposes
+add_custom_command(
+    TARGET LeetdvnUltils
+    POST_BUILD
+    COMMAND LeetdvnUltils
+)

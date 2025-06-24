@@ -1,7 +1,9 @@
 #ifndef PYTHONULTILS_H
 #define PYTHONULTILS_H
 
+#include "Definitions.h"
 #include <QDebug>
+#include <QDir>
 #include <stdio.h>
 #include <iostream>
 #include <Python.h>
@@ -9,25 +11,37 @@
 
 using namespace std;
 
-static void PyExecString(const char* inStr){
+// Define the SoftWareApp enum if not already defined
+enum SoftWareApp {
+    Maya,
+    Blender
+};
+
+LEEVTDVN_LIBRARY_EXPORT void  TestFunction() {
+    qDebug() << "TestFunction called" << Qt::endl;
+    cout << "leetdvn : TestFunction called !" << endl;
+
+}
+    // Function to execute a Python script from a string
+LEEVTDVN_LIBRARY_EXPORT void __stdcall PyExecString(const char* inStr){
     Py_Initialize();
     int result = PyRun_SimpleString(inStr);
-
     qDebug() << "result : " << result << Qt::endl;
     Py_Finalize();
 }
 
-static void PyExecFile(const char* inFilePath)
+
+LEEVTDVN_LIBRARY_EXPORT void  __stdcall PyExecFile(const char* inFilePath)
 {
     FILE* fp;
     Py_Initialize();
-    fp =  _Py_fopen(inFilePath, "r");
+    fp = fopen(inFilePath, "r");
     PyRun_SimpleFile(fp, inFilePath);
     Py_Finalize();
 }
 
 template<typename T>
-static T cleanup(const QString text) {
+LEEVTDVN_LIBRARY_EXPORT T cleanup(const QString text) {
     Py_Finalize();
     T exitcode{};
     if (!text.isEmpty())
@@ -35,14 +49,14 @@ static T cleanup(const QString text) {
     return exitcode;
 }
 
-static void cleanup(const QString text) {
+LEEVTDVN_LIBRARY_EXPORT void cleanup(const QString text) {
     Py_Finalize();
     if (!text.isEmpty())
         qDebug() << text << Qt::endl;
     return;
 }
 
-static QString PyExecResultString(const char* inScriptFolder,const char* inFileName,const char* inFunc,const char* inCmd=NULL)
+LEEVTDVN_LIBRARY_EXPORT QString PyExecResultString(const char* inScriptFolder,const char* inFileName,const char* inFunc,const char* inCmd=NULL)
 {
     if (!QDir(inScriptFolder).exists()){
         qDebug() << "Folder Does not exists" << inScriptFolder <<  Qt::endl;
@@ -104,7 +118,7 @@ static QString PyExecResultString(const char* inScriptFolder,const char* inFileN
 }
 
 
-static bool PyExecResultAsBool(const char* inScriptPath,const char* inFileName,const char* inFunc)
+LEEVTDVN_LIBRARY_EXPORT bool PyExecResultAsBool(const char* inScriptPath,const char* inFileName,const char* inFunc)
 {
     bool result=false;
     PyObject *pName, *pModule, *pFunc;
@@ -150,7 +164,12 @@ static bool PyExecResultAsBool(const char* inScriptPath,const char* inFileName,c
     return result;
 }
 
-static void PyExecFuncAsVoid(const char* inFunc,const SoftWareApp inApp=Maya,const char* Args=NULL)
+// Define the script path if not already defined
+#ifndef LEESCRIPTPATH
+#define LEESCRIPTPATH "C:/Users/leepl/Documents/GitHub/LeePickerX/Scripts/"
+#endif
+
+LEEVTDVN_LIBRARY_EXPORT void PyExecFuncAsVoid(const char* inFunc,const SoftWareApp inApp=Maya,const char* Args=NULL)
 {
     if (!QDir(LEESCRIPTPATH).exists()){
         qDebug() << "Folder Does not exists" << Qt::endl;

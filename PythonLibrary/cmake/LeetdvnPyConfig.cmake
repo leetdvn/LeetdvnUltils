@@ -1,0 +1,15 @@
+set(USER $ENV{USERNAME})
+set(LEETDVNPY_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(LEETDVNPY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(LEETDVNPY_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs")
+set(LEETDVN_COMMON_DIR "${CMAKE_SOURCE_DIR}/include/common")
+set(LEETDVN_CONFIG_DIR "${CMAKE_SOURCE_DIR}/cmake")
+
+set(PYTHON_INCLUDE_DIR "C:/Users/${USER}/AppData/Local/Programs/Python/Python312/include")
+set(PYTHON_LIB_DIR "C:/Users/${USER}/AppData/Local/Programs/Python/Python312/libs/python312.lib")
+set(PYTHON3_LIB_DIR "C:/Users/${USER}/AppData/Local/Programs/Python/Python312/libs/python3.lib")
+
+message("leetdvn X: ${CMAKE_BINARY_DIR}")
+include_directories(${LEETDVN_COMMON_DIR})
+include_directories(${LEETDVN_INCLUDE_DIR})
+include_directories(${LEETDVNPY_SOURCE_DIR})

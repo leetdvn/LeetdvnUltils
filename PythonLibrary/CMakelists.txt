@@ -2,38 +2,107 @@ cmake_minimum_required(VERSION 3.16)
 
 project(PythonLibrary VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_BUILD_TYPE Release)
+
+if(MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    set(BUILD_SHARED_LIBS TRUE)
+endif() 
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
 
-message("leetdvn 1: ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonLibraryConfig.cmake")
-
-# Only include these if they are set
-if(LEETDVN_INCLUDE_DIR)
-    include_directories(${LEETDVN_INCLUDE_DIR})
+if (Python3_LIBRARY_DEBUG AND NOT EXISTS "${Python3_LIBRARY_DEBUG}")
+    set(Python3_LIBRARY_DEBUG "${Python3_LIBRARY_RELEASE}")
+endif()
+if (Python3_LIBRARIES_DEBUG AND NOT EXISTS "${Python3_LIBRARIES_DEBUG}")
+    set(Python3_LIBRARIES_DEBUG "${Python3_LIBRARIES_RELEASE}")
 endif()
 
-if(LEETDVNPY_SOURCE_DIR)
-    include_directories(${LEETDVNPY_SOURCE_DIR})
-endif()
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LeetdvnPyConfig.cmake)
+
+include_directories(${Qt6Core_INCLUDE_DIRS})
+message(STATUS "Qt6Core_INCLUDE_DIRS: ${Qt6Core_INCLUDE_DIRS}")
 
 set(PROJECT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/PythonUltils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PythonUltils.cpp
 )
 
-add_library(PythonLibrary SHARED
+qt_add_library(PythonLibrary
+    SHARED
     ${PROJECT_SOURCES}
 )
 
+# add_library(PythonLibrary SHARED
+#     ${PROJECT_SOURCES}
+# )
+
 target_link_libraries(PythonLibrary
-    PRIVATE
+    PUBLIC
+        Qt6::Core
         Python3::Python
-        Qt::Core
+
 )
+
+if (TARGET Python3::Python)
+    set_target_properties(Python3::Python PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${Python3_LIBRARY_RELEASE}"
+    )
+endif()
+
 target_include_directories(PythonLibrary
     PUBLIC
-    ../libs
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 )
+
+# Install the header files
+install(FILES
+    include/PythonUltils.h
+    DESTINATION ${PythonLibrary_BINARY_DIR}/include
+)
+
+
+
+
+#set output directories for the library
+set(PythonLibrary_EXPORT_DIR ${CMAKE_BINARY_DIR}/PythonLibrary)
+set(PythonLibrary_BINARY_DIR ${PythonLibrary_EXPORT_DIR}/deploy/lib)
+set(PythonLibrary_INCLUDE_DIR ${PythonLibrary_EXPORT_DIR}/deploy/include)
+
+
+# After add_library and install commands
+add_custom_command(TARGET PythonLibrary POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PythonLibrary_INCLUDE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PythonLibrary_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:PythonLibrary>
+        ${PythonLibrary_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:Python3::Python>
+        ${PythonLibrary_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:Qt6::Core>
+        ${PythonLibrary_BINARY_DIR}
+COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/PythonUltils.h
+        ${PythonLibrary_INCLUDE_DIR}
+)
+
+install(TARGETS PythonLibrary
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(PythonLibrary)
+endif()
